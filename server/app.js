@@ -2,12 +2,16 @@ require("dotenv").config();
 const Express = require("express");
 const app = Express();
 const dbConnection = require("./db");
+const middleware = require("./middleware");
 
 app.use(Express.json());
 
 const controllers = require("./controllers");
 
-app.use("/workout", controllers.workoutController);
+app.use(middleware.CORS)
+app.use("/log", controllers.workoutController);
+
+// app.use(require("./middleware/validate-jwt"));
 app.use("/user", controllers.userController);
 
 dbConnection.authenticate()

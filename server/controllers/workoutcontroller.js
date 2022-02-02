@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const Express = require("express");
 const router = Express.Router();
-const validateJWT = require("../middleware/validate-jwt");
+const { validateJWT } = require("../middleware");
 const { WorkoutModel } = require("../models");
 
 router.get("/practice", validateJWT, (req,res) => {
@@ -10,12 +10,12 @@ router.get("/practice", validateJWT, (req,res) => {
 
 router.post("/create", validateJWT,async (req,res) => {
     const { description, definition, result } = req.body.work;
-    const { id } = req.user;
+    // const { id } = req.user;
     const  workEntry = {
         description,
         definition,
         result,
-        owner: id
+        owner_id: req.user.id
 
     }
     try {
@@ -40,7 +40,7 @@ router.get("/mine", validateJWT, async (req,res) => {
     try{
         const userWorkoutLog = await WorkoutModel.findAll({
             where: {
-                owner: id
+                owner_id: id
             }
         });
         res.status(200).json(userWorkoutLog);
@@ -49,15 +49,15 @@ router.get("/mine", validateJWT, async (req,res) => {
     }
 });
 
-router.put("/update/entry:id", validateJWT, async (req,res) => {
+router.put("/update/:id", validateJWT, async (req,res) => {
     const { description, definition, result} = req.body.work;
-    const workId = req.params.entryId;
-    const userId = req.user.entryId;
+    const workId = req.params.id;
+    const userId = req.user.id;
 
     const query = {
         where: {
             id: workId,
-            owner: userId
+            owner_id: userId
         }
     };
 
@@ -68,7 +68,9 @@ router.put("/update/entry:id", validateJWT, async (req,res) => {
     };
     try {
         const update = await WorkoutModel.update(updatedWork, query);
-        res.status(200).json(update);
+        res.status(200).json( 
+            {message: "Work Log Entry Updated!"}
+            );
     }catch (err) {
         res.status(500).json({ error: err });
     }
@@ -82,7 +84,7 @@ router.delete("/delete/:id",validateJWT,async (req,res) =>{
         const query = {
             where: {
                 id: workId,
-                owner: ownerId
+                owner_id: ownerId
             }
         };
 

@@ -73,6 +73,26 @@ router.post("/login" , async (req, res) => {
 });
    
 
+router.delete("/delete/:id", async (req,res) => {
+    const userID = req.user.id
+
+    try{
+        const query = {
+            where: {
+                userID:userID
+            }
+        }
+        await UserModel.destroy(query)
+        res.status(200).json({
+            message: "User deleted"
+        })
+    } catch (err){
+        res.status(500).json({
+            message: `Failed to delete user ${err}`
+        })
+    }
+})
+
 
 
 
